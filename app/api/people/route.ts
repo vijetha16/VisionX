@@ -1,0 +1,5 @@
+import { connect, getNetwork, getOrCreateSession, saveProfile } from "@/db/workspace";
+async function current(request:Request){const email=request.headers.get("x-demo-email"),name=request.headers.get("x-demo-name");return email&&name?getOrCreateSession(email,name):null;}
+export async function GET(request:Request){const session=await current(request);if(!session)return Response.json({error:"Authentication required"},{status:401});return Response.json(await getNetwork(session));}
+export async function PATCH(request:Request){const session=await current(request);if(!session)return Response.json({error:"Authentication required"},{status:401});const input=await request.json();await saveProfile(session,input);return Response.json(await getNetwork(session));}
+export async function POST(request:Request){const session=await current(request);if(!session)return Response.json({error:"Authentication required"},{status:401});const {recipientId}=await request.json() as {recipientId?:string};if(!recipientId)return Response.json({error:"Person is required"},{status:400});await connect(session,recipientId);return Response.json(await getNetwork(session));}

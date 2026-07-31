@@ -4,12 +4,14 @@ import test from "node:test";
 
 test("builds the Northstar application and API", async () => {
   await access(new URL("../dist/server/index.js", import.meta.url));
-  const [page, entry, auth, app, api, hosting] = await Promise.all([
+  const [page, entry, auth, app, api, people, resume, hosting] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/client-entry.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/auth-portal.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/startup-os.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/dashboard/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/people/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/resume/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
   ]);
   assert.match(page, /ClientEntry/);
@@ -20,5 +22,10 @@ test("builds the Northstar application and API", async () => {
   assert.match(app, /NORTHSTAR DAILY BRIEFING/);
   assert.match(app, /Ask Northstar/);
   assert.match(api, /approveInsight/);
+  assert.match(app, /PeoplePage/);
+  assert.match(app, /SettingsPage/);
+  assert.match(people, /saveProfile/);
+  assert.match(resume, /FILES\.put/);
   assert.equal(JSON.parse(hosting).d1, "DB");
+  assert.equal(JSON.parse(hosting).r2, "FILES");
 });

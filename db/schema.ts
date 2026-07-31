@@ -25,3 +25,5 @@ export const memberships = sqliteTable("memberships", {
 export const workspaceRecords = sqliteTable("workspace_records", {
   id: text("id").primaryKey(), organizationId: text("organization_id").notNull(), type: text("type").notNull(), title: text("title").notNull(), subtitle: text("subtitle").notNull(), status: text("status").notNull(), value: text("value").notNull(), progress: integer("progress").notNull(), owner: text("owner").notNull(), createdAt: text("created_at").notNull(), updatedAt: text("updated_at").notNull(),
 });
+export const profiles = sqliteTable("profiles", { userId:text("user_id").primaryKey(), headline:text("headline").notNull(), location:text("location").notNull(), bio:text("bio").notNull(), skills:text("skills").notNull(), resumeName:text("resume_name").notNull(), resumeKey:text("resume_key").notNull(), updatedAt:text("updated_at").notNull() });
+export const connections = sqliteTable("connections", { id:text("id").primaryKey(), requesterId:text("requester_id").notNull(), recipientId:text("recipient_id").notNull(), status:text("status").notNull(), createdAt:text("created_at").notNull() });
