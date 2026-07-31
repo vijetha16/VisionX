@@ -354,3 +354,29 @@ html[data-theme="dark"] .modal-heading h2 { color:#f2f5f8; }
 html[data-theme="dark"] .create-modal input { background:#10151c; border-color:#303946; color:#f2f5f8; }
 
 @media(max-width:760px){.content{padding:28px 18px 60px}.metric-grid{grid-template-columns:1fr}.ask-panel{grid-column:auto}}
+
+/* Hackathon demo authentication */
+.auth-tabs { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin:25px 0 20px; border-radius:11px; background:#e9edf1; }
+.auth-tabs button { border:0; border-radius:8px; padding:9px; background:transparent; color:#667085; font-size:9px; font-weight:760; cursor:pointer; }
+.auth-tabs button.active { background:#fff; color:#173b5d; box-shadow:0 1px 3px #10182812; }
+.auth-form { display:flex; flex-direction:column; gap:13px; }
+.auth-form label { display:flex; flex-direction:column; gap:6px; color:#526172; font-size:9px; font-weight:750; }
+.auth-form input { width:100%; border:1px solid #d8dee5; border-radius:10px; padding:12px 13px; outline:0; background:#fff; color:#17202a; font-size:10px; }
+.auth-form input:focus { border-color:#4e7292; box-shadow:0 0 0 3px #315b8212; }
+.auth-submit { display:flex; align-items:center; justify-content:space-between; margin-top:3px; padding:12px 14px; border:0; border-radius:10px; background:#173b5d; color:#fff; font-size:10px; font-weight:780; cursor:pointer; }
+.auth-submit:hover { background:#102f4b; }
+.auth-submit span { font-size:15px; }
+.auth-error { margin:0!important; padding:9px 11px; border-radius:8px; background:#fff0ef; color:#a8413d!important; font-size:8px!important; }
+.demo-hint { display:flex; gap:10px; align-items:center; margin-top:18px; padding:11px; border-radius:10px; background:#edf5f8; }
+.demo-hint>span { padding:4px 6px; border-radius:5px; background:#315b82; color:#fff; font-size:7px; font-weight:850; letter-spacing:.8px; }
+.demo-hint p { display:flex; flex-direction:column; gap:2px; margin:0; color:#657483; font-size:8px; }
+.demo-hint b { color:#31516c; font-size:9px; }
+.signout-button { cursor:pointer; }
+html[data-theme="dark"] .auth-tabs { background:#1b232d; }
+html[data-theme="dark"] .auth-tabs button { color:#8f9caa; }
+html[data-theme="dark"] .auth-tabs button.active { background:#27313d; color:#eef2f5; box-shadow:none; }
+html[data-theme="dark"] .auth-form label { color:#a7b2bd; }
+html[data-theme="dark"] .auth-form input { background:#10151c; border-color:#303946; color:#eef2f5; }
+html[data-theme="dark"] .demo-hint { background:#14232b; }
+html[data-theme="dark"] .demo-hint p { color:#8fa0ad; }
+html[data-theme="dark"] .demo-hint b { color:#c7d7e2; }

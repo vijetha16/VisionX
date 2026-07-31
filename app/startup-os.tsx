@@ -6,7 +6,7 @@ import type { DashboardData } from "@/db/bootstrap";
 const navItems = ["Overview", "Goals", "CRM", "Team", "Reports"] as const;
 const icons: Record<string, string> = { Overview: "⌂", Goals: "◎", CRM: "◇", Team: "◌", Reports: "▤" };
 
-export function StartupOS({ user }: { user?: { name: string; email: string } }) {
+export function StartupOS({ user, onSignOut }: { user?: { name: string; email: string }; onSignOut?: () => void }) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [active, setActive] = useState<(typeof navItems)[number]>("Overview");
   const [loadingId, setLoadingId] = useState<number | null>(null);
@@ -69,7 +69,7 @@ export function StartupOS({ user }: { user?: { name: string; email: string } }) 
       <div className="sidebar-bottom"><button className="nav-item"><span>⚙</span>Settings</button><div className="profile"><span className="avatar">{user?.name?.slice(0,2).toUpperCase() || "VS"}</span><span><b>{user?.name || "Vijetha"}</b><small>{user?.email || "Founder · Admin"}</small></span><span className="status-dot" /></div></div>
     </aside>
     <section className="main-area">
-      <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="theme-button" onClick={toggleTheme} aria-label="Switch light or dark mode">◐</button><button className="icon-button" aria-label="Notifications">♢<i>{pending.length}</i></button><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button><a className="signout-button" href="/signout-with-chatgpt?return_to=%2F">Sign out</a></div></header>
+      <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="theme-button" onClick={toggleTheme} aria-label="Switch light or dark mode">◐</button><button className="icon-button" aria-label="Notifications">♢<i>{pending.length}</i></button><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button><button className="signout-button" onClick={onSignOut}>Sign out</button></div></header>
       <div className="content">{active === "Overview" ? <Overview data={data} pending={pending} approve={approve} loadingId={loadingId} query={query} setQuery={setQuery} answer={answer} ask={askNorthstar} /> : <ModulePage active={active} data={data} />}{error ? <div className="toast" role="alert">{error}</div> : null}</div>
     </section>
   </main>;
