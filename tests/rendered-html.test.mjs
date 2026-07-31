@@ -24,6 +24,11 @@ test("builds the Northstar application and API", async () => {
   assert.match(api, /approveInsight/);
   assert.match(app, /PeoplePage/);
   assert.match(app, /SettingsPage/);
+  assert.match(app, /Idea Validation Engine/i);
+  assert.match(app, /AI Mediation Agent/i);
+  assert.match(app, /Autonomous Governance Agents/i);
+  assert.match(app, /Real-Time Financial Dashboard/i);
+  assert.match(app, /AI Term Sheet Analyzer/i);
   assert.match(people, /saveProfile/);
   assert.match(resume, /FILES\.put/);
   assert.equal(JSON.parse(hosting).d1, "DB");
