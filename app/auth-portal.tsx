@@ -1,5 +1,18 @@
+"use client";
+
+import { useEffect } from "react";
+
 export function AuthPortal() {
   const signInPath = "/signin-with-chatgpt?return_to=%2F";
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("northstar-theme");
+    document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
+  }, []);
+  function toggleTheme() {
+    const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = nextTheme;
+    window.localStorage.setItem("northstar-theme", nextTheme);
+  }
   return <main className="auth-page">
     <section className="auth-story">
       <div className="auth-brand"><span>✦</span><b>Northstar</b></div>
@@ -7,7 +20,7 @@ export function AuthPortal() {
       <div className="auth-canvas"><span className="orbit orbit-a"/><span className="orbit orbit-b"/><span className="auth-star">✦</span></div>
       <small className="auth-note">Built for ambitious operating teams.</small>
     </section>
-    <section className="auth-panel">
+    <section className="auth-panel"><button className="auth-theme-button" onClick={toggleTheme} aria-label="Switch light or dark mode">◐</button>
       <div className="auth-card">
         <div className="auth-mobile-brand"><span>✦</span> Northstar</div>
         <span className="eyebrow blue">WELCOME TO NORTHSTAR</span>

@@ -23,6 +23,8 @@ export function StartupOS({ user }: { user?: { name: string; email: string } }) 
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Something went wrong"); }
   }
   useEffect(() => {
+    const savedTheme = window.localStorage.getItem("northstar-theme");
+    document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
     fetch("/api/dashboard")
       .then((response) => {
         if (!response.ok) throw new Error("Could not connect to the operating data");
@@ -31,6 +33,12 @@ export function StartupOS({ user }: { user?: { name: string; email: string } }) 
       .then(setData)
       .catch((caught: unknown) => setError(caught instanceof Error ? caught.message : "Something went wrong"));
   }, []);
+
+  function toggleTheme() {
+    const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = nextTheme;
+    window.localStorage.setItem("northstar-theme", nextTheme);
+  }
   const pending = useMemo(() => data?.insights.filter((item) => item.status === "pending") ?? [], [data]);
 
   async function approve(id: number) {
@@ -61,22 +69,10 @@ export function StartupOS({ user }: { user?: { name: string; email: string } }) 
       <div className="sidebar-bottom"><button className="nav-item"><span>⚙</span>Settings</button><div className="profile"><span className="avatar">{user?.name?.slice(0,2).toUpperCase() || "VS"}</span><span><b>{user?.name || "Vijetha"}</b><small>{user?.email || "Founder · Admin"}</small></span><span className="status-dot" /></div></div>
     </aside>
     <section className="main-area">
-      <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="icon-button" aria-label="Notifications">♢<i>{pending.length}</i></button><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button><a className="signout-button" href="/signout-with-chatgpt?return_to=%2F">Sign out</a></div></header>
-      <div className="content"><AppLauncher active={active} setActive={setActive} pending={pending.length}/>{active === "Overview" ? <Overview data={data} pending={pending} approve={approve} loadingId={loadingId} query={query} setQuery={setQuery} answer={answer} ask={askNorthstar} /> : <ModulePage active={active} data={data} />}{error ? <div className="toast" role="alert">{error}</div> : null}</div>
+      <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="theme-button" onClick={toggleTheme} aria-label="Switch light or dark mode">◐</button><button className="icon-button" aria-label="Notifications">♢<i>{pending.length}</i></button><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button><a className="signout-button" href="/signout-with-chatgpt?return_to=%2F">Sign out</a></div></header>
+      <div className="content">{active === "Overview" ? <Overview data={data} pending={pending} approve={approve} loadingId={loadingId} query={query} setQuery={setQuery} answer={answer} ask={askNorthstar} /> : <ModulePage active={active} data={data} />}{error ? <div className="toast" role="alert">{error}</div> : null}</div>
     </section>
   </main>;
-}
-
-function AppLauncher({ active, setActive, pending }: { active: (typeof navItems)[number]; setActive: (value: (typeof navItems)[number]) => void; pending: number }) {
-  const apps: Array<{ name: string; label: string; icon: string; target: (typeof navItems)[number]; tone: string; badge?: string }> = [
-    { name: "Founder Desk", label: "Today", icon: "✦", target: "Overview", tone: "ink", badge: pending ? `${pending}` : undefined },
-    { name: "Pipeline", label: "$312k open", icon: "↗", target: "CRM", tone: "coral" },
-    { name: "Projects", label: "4 priorities", icon: "✓", target: "Goals", tone: "sky" },
-    { name: "People", label: "87% velocity", icon: "◌", target: "Team", tone: "jade" },
-    { name: "Runway", label: "14.2 months", icon: "⌁", target: "Reports", tone: "amber" },
-    { name: "Reviews", label: "Friday ready", icon: "▤", target: "Reports", tone: "plum" },
-  ];
-  return <section className="app-launcher" aria-label="Operating apps"><div className="launcher-heading"><span>YOUR OPERATING APPS</span><button>Customize</button></div><div className="app-grid">{apps.map((app) => <button key={app.name} className={active === app.target ? "app-tile selected" : "app-tile"} onClick={() => setActive(app.target)}><span className={`app-icon ${app.tone}`}>{app.icon}{app.badge ? <i>{app.badge}</i> : null}</span><span><b>{app.name}</b><small>{app.label}</small></span></button>)}</div></section>;
 }
 
 function LoadingState({ error, retry }: { error: string; retry: () => void }) {
@@ -88,30 +84,13 @@ function Overview({ data, pending, approve, loadingId, query, setQuery, answer, 
   return <>
     <section className="page-heading"><div><span className="eyebrow"><i /> LIVE OPERATING PICTURE</span><h1>Good morning, Vijetha.</h1><p>Here’s what needs your attention across Arc Labs today.</p></div><div className="date-chip"><span>FRI</span><b>31</b><small>July 2026</small></div></section>
     <section className="briefing-card"><div className="briefing-glow"/><div className="ai-orb">✦</div><div className="briefing-copy"><span className="eyebrow violet">NORTHSTAR DAILY BRIEFING</span><h2>Strong growth. One execution risk needs a decision.</h2><p>Revenue momentum is healthy and runway remains comfortable. The enterprise workspace launch is six days behind and now blocks three deals worth <strong>$96k</strong>. Reassigning a security reviewer today protects the August 8 launch.</p><div className="briefing-meta"><span><i className="pulse"/> Updated 4 min ago</span><button onClick={() => document.getElementById("ask-input")?.focus()}>Explore analysis →</button></div></div><div className="health-score"><div><span>82</span><small>/100</small></div><b>Company health</b><em>Healthy</em></div></section>
-    <section className="metric-grid">{data.metrics.map((metric) => <article className="metric-card" key={metric.id}><div className="metric-top"><span>{metric.label}</span><em className={metric.tone}>{metric.change}</em></div><h3>{metric.value}</h3><div className="progress-track"><i style={{ width: `${metric.progress}%` }}/></div><small>{metric.label === "Monthly revenue" ? "$108k target" : metric.label === "Cash runway" ? "12 mo threshold" : metric.label === "Sales pipeline" ? "$485k target" : "90% target"}</small></article>)}</section>
-    <BusinessCharts/>
+    <section className="metric-grid">{data.metrics.slice(0,3).map((metric) => <article className="metric-card" key={metric.id}><div className="metric-top"><span>{metric.label}</span><em className={metric.tone}>{metric.change}</em></div><h3>{metric.value}</h3><div className="progress-track"><i style={{ width: `${metric.progress}%` }}/></div><small>{metric.label === "Monthly revenue" ? "$108k target" : metric.label === "Cash runway" ? "12 mo threshold" : "$485k target"}</small></article>)}</section>
     <div className="dashboard-grid">
-      <section className="panel insights-panel"><div className="panel-header"><div><span className="eyebrow coral">DECISION QUEUE</span><h2>Needs your attention</h2></div><span className="count-badge">{pending.length} open</span></div><div className="insight-list">{data.insights.map((insight) => <article className={`insight ${insight.status}`} key={insight.id}><span className={`severity ${insight.severity}`}>{insight.severity === "critical" ? "!" : insight.severity === "warning" ? "△" : "↗"}</span><div><div className="insight-title"><h3>{insight.title}</h3><span className={insight.severity}>{insight.severity}</span></div><p>{insight.detail}</p><div className="insight-actions">{insight.status === "approved" ? <span className="approved-mark">✓ Approved and added to plan</span> : <><button className="action-button" onClick={() => approve(insight.id)} disabled={loadingId === insight.id}>{loadingId === insight.id ? "Applying…" : insight.action}</button><button className="text-button">View context</button></>}</div></div></article>)}</div></section>
-      <section className="panel goals-panel"><div className="panel-header"><div><span className="eyebrow blue">EXECUTION</span><h2>Company priorities</h2></div><button className="text-button">View all →</button></div><div className="initiative-list">{data.initiatives.map((item) => <article className="initiative" key={item.id}><div className="initiative-title"><span className="avatar mini">{item.owner[0]}</span><div><h3>{item.title}</h3><p>{item.team} · {item.owner}</p></div><em className={item.status === "At risk" ? "at-risk" : "on-track"}>{item.status}</em></div><div className="initiative-progress"><div className="progress-track"><i style={{ width: `${item.progress}%` }}/></div><span>{item.progress}%</span><small>{item.due}</small></div></article>)}</div></section>
+      <section className="panel insights-panel"><div className="panel-header"><div><span className="eyebrow coral">DECISION QUEUE</span><h2>Needs your attention</h2></div><span className="count-badge">{pending.length} open</span></div><div className="insight-list">{data.insights.slice(0,2).map((insight) => <article className={`insight ${insight.status}`} key={insight.id}><span className={`severity ${insight.severity}`}>{insight.severity === "critical" ? "!" : "△"}</span><div><div className="insight-title"><h3>{insight.title}</h3><span className={insight.severity}>{insight.severity}</span></div><p>{insight.detail}</p><div className="insight-actions">{insight.status === "approved" ? <span className="approved-mark">✓ Approved and added to plan</span> : <><button className="action-button" onClick={() => approve(insight.id)} disabled={loadingId === insight.id}>{loadingId === insight.id ? "Applying…" : insight.action}</button><button className="text-button">View context</button></>}</div></div></article>)}</div></section>
+      <section className="panel goals-panel"><div className="panel-header"><div><span className="eyebrow blue">EXECUTION</span><h2>Company priorities</h2></div><button className="text-button">View all →</button></div><div className="initiative-list">{data.initiatives.slice(0,3).map((item) => <article className="initiative" key={item.id}><div className="initiative-title"><span className="avatar mini">{item.owner[0]}</span><div><h3>{item.title}</h3><p>{item.team} · {item.owner}</p></div><em className={item.status === "At risk" ? "at-risk" : "on-track"}>{item.status}</em></div><div className="initiative-progress"><div className="progress-track"><i style={{ width: `${item.progress}%` }}/></div><span>{item.progress}%</span><small>{item.due}</small></div></article>)}</div></section>
       <section className="panel ask-panel"><div className="ask-heading"><div className="ai-orb small-orb">✦</div><div><span className="eyebrow violet">ASK YOUR STARTUP</span><h2>One answer, across every team.</h2></div></div>{answer ? <div className="answer-box"><span>✦</span><p>{answer}</p></div> : <div className="suggestions"><button onClick={() => setQuery("What is our biggest risk?")}>What is our biggest risk?</button><button onClick={() => setQuery("How is revenue trending?")}>How is revenue trending?</button><button onClick={() => setQuery("Where is team capacity tight?")}>Where is team capacity tight?</button></div>}<form className="ask-form" onSubmit={ask}><input id="ask-input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Ask about revenue, runway, goals, or blockers…" aria-label="Ask Northstar"/><button aria-label="Send question">↑</button></form></section>
-      <section className="panel activity-panel"><div className="panel-header"><div><span className="eyebrow mint">COMPANY FEED</span><h2>Recent activity</h2></div><span className="live-label"><i/> Live</span></div><div className="activity-list">{data.activity.slice(0, 5).map((item) => <div className="activity" key={item.id}><span className="activity-icon">{item.actor === "Northstar AI" ? "✦" : item.actor[0]}</span><p><b>{item.actor}</b>{item.action}</p><small>{item.timestamp}</small></div>)}</div></section>
     </div>
   </>;
-}
-
-function BusinessCharts() {
-  const stages = [
-    { name: "Discovery", value: "$1.5M", width: 100, tone: "sky" },
-    { name: "Evaluation", value: "$1.2M", width: 82, tone: "jade" },
-    { name: "Proposal", value: "$900k", width: 64, tone: "amber" },
-    { name: "Negotiation", value: "$450k", width: 46, tone: "coral" },
-    { name: "Closed won", value: "$150k", width: 28, tone: "plum" },
-  ];
-  const points = [78, 72, 71, 60, 55, 44, 38];
-  return <section className="visual-grid">
-    <article className="visual-card funnel-card"><div className="visual-title"><div><span className="eyebrow blue">SALES FLOW</span><h2>Pipeline overview</h2></div><button className="period-button">This quarter ⌄</button></div><div className="funnel-body"><div className="funnel-shape">{stages.map((stage) => <div key={stage.name} className={`funnel-stage ${stage.tone}`} style={{width:`${stage.width}%`}} />)}</div><div className="funnel-labels">{stages.map((stage) => <div key={stage.name}><span>{stage.name}</span><b>{stage.value}</b></div>)}</div></div><button className="card-link">View full pipeline <span>→</span></button></article>
-    <article className="visual-card runway-card"><div className="visual-title"><div><span className="eyebrow mint">FINANCIAL HEALTH</span><h2>Runway forecast</h2></div><span className="healthy-pill">Healthy</span></div><div className="line-chart"><div className="y-labels"><span>18 mo</span><span>12 mo</span><span>6 mo</span><span>0 mo</span></div><div className="plot"><div className="grid-line one"/><div className="grid-line two"/><div className="grid-line three"/>{points.map((point,index) => <span key={index} className="chart-point" style={{left:`${index*15+4}%`,top:`${100-point}%`}}/>)}<div className="chart-summary"><b>14.2 months</b><span>of runway</span></div><div className="x-labels"><span>Aug</span><span>Oct</span><span>Dec</span><span>Feb</span></div></div></div><div className="runway-note"><span>⌁</span><p><b>Revenue growth extends runway</b>Current MRR adds approximately 1.8 months to the base forecast.</p></div></article>
-  </section>;
 }
 
 type WorkspaceRecord = { id:string; type:string; title:string; subtitle:string; status:string; value:string; progress:number; owner:string };

@@ -294,3 +294,63 @@ body { background:var(--bg); color:var(--text); font-family:var(--font-geist-san
 .create-modal label { display:flex; flex-direction:column; gap:7px; margin-bottom:14px; color:#526172; font-size:9px; font-weight:750; }.create-modal input{width:100%;border:1px solid #d9e0e7;border-radius:9px;padding:11px 12px;outline:0;color:#17202a;background:#fff;font-size:10px}.create-modal input:focus{border-color:#4f7596;box-shadow:0 0 0 3px #4f759612}.create-modal input::placeholder{color:#a2aab4}
 .modal-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:20px; }.cancel-button{border:1px solid #d9e0e7;background:#fff;color:#526172;border-radius:9px;padding:9px 13px;font-size:9px;font-weight:750;cursor:pointer}
 @media(max-width:760px){.record-row{grid-template-columns:34px 1fr 75px 28px}.record-row>.table-progress,.record-row>em{display:none}}
+
+/* Calm workspace refresh: restored full navigation, more breathing room */
+.theme-button,.auth-theme-button { width:37px; height:37px; display:grid; place-items:center; border:1px solid #dce1e6; border-radius:9px; background:#fff; color:#526172; cursor:pointer; font-size:15px; }
+.auth-theme-button { position:absolute; top:26px; right:28px; z-index:3; }
+.profile { color:inherit; text-decoration:none; }
+.metric-grid { grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:20px; }
+.dashboard-grid { gap:18px; }
+.ask-panel { grid-column:1 / -1; }
+.content { max-width:1320px; padding:40px 44px 80px; }
+.briefing-card { margin-bottom:20px; }
+.panel-header { padding:22px 24px 18px; }
+.insight-list,.initiative-list { padding-left:24px; padding-right:24px; }
+
+@media(min-width:761px){
+  .sidebar { width:238px; padding:24px 16px 16px; align-items:stretch; }
+  .brand { justify-content:flex-start; padding:0 8px 24px; }
+  .brand>span:last-child,.workspace>span:nth-child(2),.workspace>.chevron,.profile>span:nth-child(2),.profile>.status-dot,.nav-label { display:flex; }
+  .workspace { padding:11px; margin-bottom:26px; border-radius:12px; }
+  .workspace .avatar { width:31px; height:31px; }
+  .sidebar .nav-item { width:100%; height:auto; margin:2px 0; padding:10px 11px; justify-content:flex-start; border-radius:9px; font-size:13px; }
+  .sidebar .nav-item>span { width:18px; font-size:17px; }
+  .sidebar .nav-item.active { box-shadow:inset 3px 0 #73a7d8; }
+  .sidebar .nav-item em { position:static; transform:none; margin-left:auto; }
+  .profile { justify-content:flex-start; padding:16px 7px 2px; }
+  .main-area { width:calc(100% - 238px); margin-left:238px; }
+}
+
+/* Persistent dark theme */
+html[data-theme="dark"] { background:#0d1117; }
+html[data-theme="dark"] body,html[data-theme="dark"] .main-area { background:#0d1117; color:#edf1f5; }
+html[data-theme="dark"] .topbar { background:#111720ed; border-color:#252d38; }
+html[data-theme="dark"] .breadcrumb strong,html[data-theme="dark"] .page-heading h1,html[data-theme="dark"] .briefing-copy h2,html[data-theme="dark"] .metric-card h3,html[data-theme="dark"] .panel-header h2,html[data-theme="dark"] .ask-heading h2,html[data-theme="dark"] .insight-title h3,html[data-theme="dark"] .initiative-title h3,html[data-theme="dark"] .table-row b,html[data-theme="dark"] .module-score strong,html[data-theme="dark"] .module-summary h2 { color:#f2f5f8; }
+html[data-theme="dark"] .page-heading p,html[data-theme="dark"] .briefing-copy>p,html[data-theme="dark"] .insight p,html[data-theme="dark"] .initiative-title p,html[data-theme="dark"] .initiative-progress span,html[data-theme="dark"] .initiative-progress small,html[data-theme="dark"] .module-summary p,html[data-theme="dark"] .module-score p { color:#9aa7b5; }
+html[data-theme="dark"] .briefing-card,html[data-theme="dark"] .metric-card,html[data-theme="dark"] .panel,html[data-theme="dark"] .module-hero,html[data-theme="dark"] .visual-card { background:#151b23; border-color:#28313d; box-shadow:none; }
+html[data-theme="dark"] .briefing-card { background:#151b23; }
+html[data-theme="dark"] .date-chip,html[data-theme="dark"] .icon-button,html[data-theme="dark"] .theme-button,html[data-theme="dark"] .signout-button { background:#151b23; border-color:#2a3441; color:#b8c3ce; }
+html[data-theme="dark"] .progress-track,html[data-theme="dark"] .table-progress { background:#29323e; }
+html[data-theme="dark"] .panel-header,html[data-theme="dark"] .insight,html[data-theme="dark"] .initiative,html[data-theme="dark"] .activity,html[data-theme="dark"] .table-row { border-color:#252e39; }
+html[data-theme="dark"] .ask-panel { background:#151b23; }
+html[data-theme="dark"] .suggestions button,html[data-theme="dark"] .ask-form,html[data-theme="dark"] .answer-box { background:#10151c; border-color:#303a47; color:#b9c3ce; }
+html[data-theme="dark"] .ask-form input { color:#f2f5f8; }
+html[data-theme="dark"] .activity p b { color:#e7ebef; }
+html[data-theme="dark"] .module-visual { background:#111820; }
+html[data-theme="dark"] .record-copy b { color:#eef2f6; }
+html[data-theme="dark"] .record-row { border-color:#252e39; }
+html[data-theme="dark"] .status-button { background:#1b232d; border-color:#303b48; color:#b8c3ce; }
+html[data-theme="dark"] .auth-page { background:#0e1319; }
+html[data-theme="dark"] .auth-panel { background:#0e1319; }
+html[data-theme="dark"] .auth-card h2 { color:#f2f5f8; }
+html[data-theme="dark"] .auth-card>p { color:#9aa7b5; }
+html[data-theme="dark"] .auth-secondary { background:#151b23; border-color:#303946; color:#e9edf1; }
+html[data-theme="dark"] .auth-secondary small { color:#8996a4; }
+html[data-theme="dark"] .auth-divider:before,html[data-theme="dark"] .auth-divider:after { background:#2a323d; }
+html[data-theme="dark"] .auth-theme-button { background:#151b23; border-color:#303946; color:#d8dee5; }
+html[data-theme="dark"] .auth-security { background:#12241f; }
+html[data-theme="dark"] .create-modal { background:#151b23; }
+html[data-theme="dark"] .modal-heading h2 { color:#f2f5f8; }
+html[data-theme="dark"] .create-modal input { background:#10151c; border-color:#303946; color:#f2f5f8; }
+
+@media(max-width:760px){.content{padding:28px 18px 60px}.metric-grid{grid-template-columns:1fr}.ask-panel{grid-column:auto}}
