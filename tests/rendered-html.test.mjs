@@ -4,12 +4,13 @@ import test from "node:test";
 
 test("builds the Northstar application and API", async () => {
   await access(new URL("../dist/server/index.js", import.meta.url));
-  const [page, entry, auth, app, api, people, resume, hosting] = await Promise.all([
+  const [page, entry, auth, app, api, agents, people, resume, hosting] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/client-entry.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/auth-portal.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/startup-os.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/dashboard/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/agents/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/people/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/resume/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
@@ -29,6 +30,8 @@ test("builds the Northstar application and API", async () => {
   assert.match(app, /Autonomous Governance Agents/i);
   assert.match(app, /Real-Time Financial Dashboard/i);
   assert.match(app, /AI Term Sheet Analyzer/i);
+  assert.match(agents, /api\.openai\.com\/v1\/responses/);
+  assert.match(agents, /json_schema/);
   assert.match(people, /saveProfile/);
   assert.match(resume, /FILES\.put/);
   assert.equal(JSON.parse(hosting).d1, "DB");
