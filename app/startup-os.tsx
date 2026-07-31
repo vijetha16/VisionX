@@ -62,9 +62,21 @@ export function StartupOS() {
     </aside>
     <section className="main-area">
       <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="icon-button" aria-label="Notifications">♢<i>{pending.length}</i></button><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button></div></header>
-      <div className="content">{active === "Overview" ? <Overview data={data} pending={pending} approve={approve} loadingId={loadingId} query={query} setQuery={setQuery} answer={answer} ask={askNorthstar} /> : <ModulePage active={active} data={data} />}{error ? <div className="toast" role="alert">{error}</div> : null}</div>
+      <div className="content"><AppLauncher active={active} setActive={setActive} pending={pending.length}/>{active === "Overview" ? <Overview data={data} pending={pending} approve={approve} loadingId={loadingId} query={query} setQuery={setQuery} answer={answer} ask={askNorthstar} /> : <ModulePage active={active} data={data} />}{error ? <div className="toast" role="alert">{error}</div> : null}</div>
     </section>
   </main>;
+}
+
+function AppLauncher({ active, setActive, pending }: { active: (typeof navItems)[number]; setActive: (value: (typeof navItems)[number]) => void; pending: number }) {
+  const apps: Array<{ name: string; label: string; icon: string; target: (typeof navItems)[number]; tone: string; badge?: string }> = [
+    { name: "Founder Desk", label: "Today", icon: "✦", target: "Overview", tone: "ink", badge: pending ? `${pending}` : undefined },
+    { name: "Pipeline", label: "$312k open", icon: "↗", target: "CRM", tone: "coral" },
+    { name: "Projects", label: "4 priorities", icon: "✓", target: "Goals", tone: "sky" },
+    { name: "People", label: "87% velocity", icon: "◌", target: "Team", tone: "jade" },
+    { name: "Runway", label: "14.2 months", icon: "⌁", target: "Reports", tone: "amber" },
+    { name: "Reviews", label: "Friday ready", icon: "▤", target: "Reports", tone: "plum" },
+  ];
+  return <section className="app-launcher" aria-label="Operating apps"><div className="launcher-heading"><span>YOUR OPERATING APPS</span><button>Customize</button></div><div className="app-grid">{apps.map((app) => <button key={app.name} className={active === app.target ? "app-tile selected" : "app-tile"} onClick={() => setActive(app.target)}><span className={`app-icon ${app.tone}`}>{app.icon}{app.badge ? <i>{app.badge}</i> : null}</span><span><b>{app.name}</b><small>{app.label}</small></span></button>)}</div></section>;
 }
 
 function LoadingState({ error, retry }: { error: string; retry: () => void }) {

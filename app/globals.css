@@ -148,3 +148,33 @@ body { background:var(--bg); color:var(--text); font-family:var(--font-geist-san
 .loading-line { background:#e3e7eb; }
 .loading-line i { background:#315b82; }
 .toast { background:#fff3f2; border-color:#efc9c6; color:#9d3833; box-shadow:0 8px 25px #10182812; }
+
+/* Northstar modular workspace — inspired by integrated business suites, never copied */
+.content { max-width:1460px; }
+.app-launcher { margin:-5px 0 30px; }
+.launcher-heading { display:flex; align-items:center; justify-content:space-between; margin:0 2px 11px; }
+.launcher-heading>span { font-size:8px; font-weight:850; letter-spacing:1.45px; color:#7b8794; }
+.launcher-heading button { border:0; background:transparent; color:#315b82; font-size:9px; font-weight:750; cursor:pointer; }
+.app-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
+.app-tile { min-width:0; display:flex; align-items:center; gap:10px; text-align:left; padding:11px; border-radius:13px; border:1px solid #e1e5ea; background:#fff; color:#17202a; cursor:pointer; box-shadow:0 1px 2px #10182808; transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease; }
+.app-tile:hover { transform:translateY(-2px); border-color:#cad2da; box-shadow:0 8px 18px #25344612; }
+.app-tile.selected { border-color:#aebbc7; box-shadow:0 0 0 2px #173b5d0c; }
+.app-tile>span:last-child { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.app-tile b { font-size:10px; font-weight:760; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.app-tile small { font-size:8px; color:#7b8794; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.app-icon { position:relative; width:37px; height:37px; flex:0 0 auto; display:grid; place-items:center; border-radius:11px; color:#fff; font-size:15px; font-weight:850; }
+.app-icon i { position:absolute; right:-4px; top:-5px; width:16px; height:16px; display:grid; place-items:center; border-radius:99px; background:#fff; color:#a83e38; border:1px solid #efcfcd; font-size:7px; font-style:normal; }
+.app-icon.ink { background:#24384c; }.app-icon.coral { background:#d96c5f; }.app-icon.sky { background:#4f91c4; }.app-icon.jade { background:#3b9a81; }.app-icon.amber { background:#d59a43; }.app-icon.plum { background:#82688d; }
+.briefing-card { border-radius:20px; background:linear-gradient(100deg,#fff 0 73%,#f0f5f7 73%); }
+.metric-card { border-radius:15px; border-top:3px solid #d8e1e8; }
+.metric-card:nth-child(1) { border-top-color:#3b9a81; }.metric-card:nth-child(2) { border-top-color:#4f91c4; }.metric-card:nth-child(3) { border-top-color:#d59a43; }.metric-card:nth-child(4) { border-top-color:#d96c5f; }
+.panel { border-radius:18px; }
+.action-button { background:#315b82; border-color:#315b82; }
+.insight .action-button { background:#fff; color:#173b5d; border-color:#b8c4cf; box-shadow:none; }
+.insight .action-button:hover { background:#edf3f7; }
+.ask-panel { background:linear-gradient(135deg,#f5f8fa,#eef3f6); }
+.small-orb { background:#315b82; }
+.module-hero { border-radius:20px; }
+
+@media(max-width:1120px){.app-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.app-grid{display:flex;overflow-x:auto;padding-bottom:5px;scroll-snap-type:x proximity}.app-tile{min-width:150px;scroll-snap-align:start}.app-launcher{margin-bottom:24px}.briefing-card{background:#fff}}
