@@ -6,7 +6,7 @@ import type { DashboardData } from "@/db/bootstrap";
 const navItems = ["Overview", "Goals", "CRM", "Team", "Reports"] as const;
 const icons: Record<string, string> = { Overview: "⌂", Goals: "◎", CRM: "◇", Team: "◌", Reports: "▤" };
 
-export function StartupOS() {
+export function StartupOS({ user }: { user?: { name: string; email: string } }) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [active, setActive] = useState<(typeof navItems)[number]>("Overview");
   const [loadingId, setLoadingId] = useState<number | null>(null);
@@ -58,10 +58,10 @@ export function StartupOS() {
       <div className="brand"><span className="brand-mark">N</span><span>northstar</span></div>
       <div className="workspace"><span className="avatar small">A</span><span><b>Arc Labs</b><small>Growth workspace</small></span><span className="chevron">⌄</span></div>
       <nav aria-label="Main navigation"><p className="nav-label">Workspace</p>{navItems.map((item) => <button key={item} className={active === item ? "nav-item active" : "nav-item"} onClick={() => { setActive(item); setMenuOpen(false); }}><span>{icons[item]}</span>{item}{item === "Overview" && pending.length ? <em>{pending.length}</em> : null}</button>)}</nav>
-      <div className="sidebar-bottom"><button className="nav-item"><span>⚙</span>Settings</button><div className="profile"><span className="avatar">VS</span><span><b>Vijetha</b><small>Founder · Admin</small></span><span className="status-dot" /></div></div>
+      <div className="sidebar-bottom"><button className="nav-item"><span>⚙</span>Settings</button><div className="profile"><span className="avatar">{user?.name?.slice(0,2).toUpperCase() || "VS"}</span><span><b>{user?.name || "Vijetha"}</b><small>{user?.email || "Founder · Admin"}</small></span><span className="status-dot" /></div></div>
     </aside>
     <section className="main-area">
-      <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="icon-button" aria-label="Notifications">♢<i>{pending.length}</i></button><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button></div></header>
+      <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="icon-button" aria-label="Notifications">♢<i>{pending.length}</i></button><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button><a className="signout-button" href="/signout-with-chatgpt?return_to=%2F">Sign out</a></div></header>
       <div className="content"><AppLauncher active={active} setActive={setActive} pending={pending.length}/>{active === "Overview" ? <Overview data={data} pending={pending} approve={approve} loadingId={loadingId} query={query} setQuery={setQuery} answer={answer} ask={askNorthstar} /> : <ModulePage active={active} data={data} />}{error ? <div className="toast" role="alert">{error}</div> : null}</div>
     </section>
   </main>;
