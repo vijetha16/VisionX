@@ -274,3 +274,23 @@ body { background:var(--bg); color:var(--text); font-family:var(--font-geist-san
 
 @media(max-width:900px){.auth-page{grid-template-columns:1fr}.auth-story{display:none}.auth-panel{min-height:100vh;padding:28px}.auth-mobile-brand{display:flex}}
 @media(max-width:460px){.auth-card h2{font-size:27px}.signout-button{display:none}}
+
+/* Persistent workspace records */
+.role-pill { display:inline-flex; padding:6px 9px; border-radius:99px; background:#e9f7f3; color:#0f766e; font-size:8px; font-weight:850; text-transform:uppercase; letter-spacing:.7px; }
+.save-state { color:#0f766e; font-size:8px; font-weight:750; }
+.module-error { margin:12px 18px 0; padding:10px 12px; border-radius:9px; background:#fff1f0; color:#a8413d; font-size:9px; }
+.module-empty { padding:46px 20px; text-align:center; color:#84909e; font-size:10px; }
+.record-row { display:grid; grid-template-columns:34px minmax(190px,1fr) minmax(90px,.4fr) 55px 84px 28px; gap:12px; align-items:center; padding:13px 20px; border-bottom:1px solid #edf0f2; }
+.record-row:last-child { border-bottom:0; }
+.record-icon { display:grid; place-items:center; width:32px; height:32px; border-radius:9px; color:#fff; font-weight:900; }
+.record-icon.goal { background:#4f91c4; }.record-icon.deal { background:#d96c5f; }.record-icon.role { background:#3b9a81; }.record-icon.report { background:#82688d; }
+.record-copy { min-width:0; display:flex; flex-direction:column; gap:3px; }.record-copy b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#263342; font-size:10px; }.record-copy small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#84909e; font-size:8px; }
+.record-row>em { color:#526172; font-size:9px; font-style:normal; font-weight:750; }
+.status-button { border:1px solid #d9e0e7; background:#f8fafb; color:#526172; border-radius:7px; padding:6px 8px; font-size:8px; cursor:pointer; }.status-button:hover{border-color:#98a9b8;background:#fff}
+.delete-button { width:26px; height:26px; border:0; border-radius:7px; background:transparent; color:#a2aab4; cursor:pointer; font-size:16px; }.delete-button:hover{background:#fff0ef;color:#b54741}
+.modal-backdrop { position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:20px; background:#10202d80; backdrop-filter:blur(4px); }
+.create-modal { width:min(440px,100%); padding:24px; border-radius:18px; background:#fff; box-shadow:0 25px 80px #10202d44; }
+.modal-heading { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; }.modal-heading h2{margin:6px 0 0;color:#17202a;font-size:22px}.modal-heading>button{border:0;background:#f3f5f7;width:30px;height:30px;border-radius:8px;color:#667085;cursor:pointer;font-size:16px}
+.create-modal label { display:flex; flex-direction:column; gap:7px; margin-bottom:14px; color:#526172; font-size:9px; font-weight:750; }.create-modal input{width:100%;border:1px solid #d9e0e7;border-radius:9px;padding:11px 12px;outline:0;color:#17202a;background:#fff;font-size:10px}.create-modal input:focus{border-color:#4f7596;box-shadow:0 0 0 3px #4f759612}.create-modal input::placeholder{color:#a2aab4}
+.modal-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:20px; }.cancel-button{border:1px solid #d9e0e7;background:#fff;color:#526172;border-radius:9px;padding:9px 13px;font-size:9px;font-weight:750;cursor:pointer}
+@media(max-width:760px){.record-row{grid-template-columns:34px 1fr 75px 28px}.record-row>.table-progress,.record-row>em{display:none}}

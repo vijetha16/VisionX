@@ -12,3 +12,16 @@ export const insights = sqliteTable("insights", {
 export const activity = sqliteTable("activity", {
   id: integer("id").primaryKey({ autoIncrement: true }), actor: text("actor").notNull(), action: text("action").notNull(), timestamp: text("timestamp").notNull(),
 });
+
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(), email: text("email").notNull().unique(), name: text("name").notNull(), createdAt: text("created_at").notNull(),
+});
+export const organizations = sqliteTable("organizations", {
+  id: text("id").primaryKey(), name: text("name").notNull(), slug: text("slug").notNull().unique(), createdAt: text("created_at").notNull(),
+});
+export const memberships = sqliteTable("memberships", {
+  id: text("id").primaryKey(), userId: text("user_id").notNull(), organizationId: text("organization_id").notNull(), role: text("role").notNull(), createdAt: text("created_at").notNull(),
+});
+export const workspaceRecords = sqliteTable("workspace_records", {
+  id: text("id").primaryKey(), organizationId: text("organization_id").notNull(), type: text("type").notNull(), title: text("title").notNull(), subtitle: text("subtitle").notNull(), status: text("status").notNull(), value: text("value").notNull(), progress: integer("progress").notNull(), owner: text("owner").notNull(), createdAt: text("created_at").notNull(), updatedAt: text("updated_at").notNull(),
+});
