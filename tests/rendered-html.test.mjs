@@ -4,10 +4,11 @@ import test from "node:test";
 
 test("builds the Northstar application and API", async () => {
   await access(new URL("../dist/server/index.js", import.meta.url));
-  const [page, entry, auth, app, api, agents, people, resume, hosting] = await Promise.all([
+  const [page, entry, auth, landing, app, api, agents, people, resume, hosting] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/client-entry.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/auth-portal.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/landing-page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/startup-os.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/dashboard/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/agents/route.ts", import.meta.url), "utf8"),
@@ -18,8 +19,10 @@ test("builds the Northstar application and API", async () => {
   assert.match(page, /ClientEntry/);
   assert.match(entry, /AuthPortal/);
   assert.match(entry, /StartupOS/);
-  assert.match(auth, /Create account/);
+  assert.match(auth, /Create workspace/);
   assert.match(auth, /demo1234/);
+  assert.match(landing, /Run your company with/);
+  assert.match(landing, /Less dashboard\. More direction/);
   assert.match(app, /NORTHSTAR DAILY BRIEFING/);
   assert.match(app, /Ask Northstar/);
   assert.match(api, /approveInsight/);
