@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 
-export type AgentResult={score:string;title:string;summary:string;items:string[];mode:"live"|"demo";runId:string};
+export type AgentResult={score:string;confidence:number;title:string;summary:string;items:string[];evidence:string[];assumptions:string[];risks:string[];metrics:Array<{label:string;value:string;source:string}>;mode:"live"|"demo";runId:string};
 const database=()=>env.DB;
 export async function ensureAgentDatabase(){await database().batch([
   database().prepare("CREATE TABLE IF NOT EXISTS agent_runs (id TEXT PRIMARY KEY, organization_email TEXT NOT NULL, agent_type TEXT NOT NULL, input TEXT NOT NULL, status TEXT NOT NULL, output_json TEXT NOT NULL, mode TEXT NOT NULL, created_at TEXT NOT NULL, completed_at TEXT)"),

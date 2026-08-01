@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 
 export type WorkspaceRecord = { id: string; type: string; title: string; subtitle: string; status: string; value: string; progress: number; owner: string; created_at: string; updated_at: string };
-export type WorkspaceSession = { user: { id: string; email: string; name: string }; organization: { id: string; name: string; slug: string }; role: "owner" | "member" };
+export type WorkspaceSession = { user: { id: string; email: string; name: string }; organization: { id: string; name: string; slug: string }; role: "owner" | "admin" | "member" | "viewer" };
 
 function db() { if (!env.DB) throw new Error("Database binding is unavailable"); return env.DB; }
 const now = () => new Date().toISOString();
@@ -18,7 +18,10 @@ export async function ensureWorkspaceDatabase() {
     database.prepare("CREATE INDEX IF NOT EXISTS workspace_records_org_type_idx ON workspace_records(organization_id, type)"),
     database.prepare("CREATE TABLE IF NOT EXISTS profiles (user_id TEXT PRIMARY KEY, headline TEXT NOT NULL DEFAULT '', location TEXT NOT NULL DEFAULT '', bio TEXT NOT NULL DEFAULT '', skills TEXT NOT NULL DEFAULT '', resume_name TEXT NOT NULL DEFAULT '', resume_key TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL)"),
     database.prepare("CREATE TABLE IF NOT EXISTS connections (id TEXT PRIMARY KEY, requester_id TEXT NOT NULL, recipient_id TEXT NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL)"),
+    database.prepare("CREATE TABLE IF NOT EXISTS team_invites (id TEXT PRIMARY KEY, organization_id TEXT NOT NULL, inviter_id TEXT NOT NULL, email TEXT NOT NULL, role TEXT NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL)"),
     database.prepare("CREATE INDEX IF NOT EXISTS connections_people_idx ON connections(requester_id, recipient_id)"),
+    database.prepare("CREATE UNIQUE INDEX IF NOT EXISTS memberships_user_org_idx ON memberships(user_id, organization_id)"),
+    database.prepare("CREATE INDEX IF NOT EXISTS team_invites_email_status_idx ON team_invites(email, status)"),
   ]);
 }
 
@@ -49,7 +52,15 @@ export async function getOrCreateSession(email: string, displayName: string): Pr
     user={id:userId,email:email.toLowerCase(),name:displayName};
     await seedWorkspace(orgId, displayName);
   }
-  const membership = await database.prepare("SELECT organization_id,role FROM memberships WHERE user_id = ? LIMIT 1").bind(user.id).first<{organization_id:string;role:"owner"|"member"}>();
+  const pendingInvite = await database.prepare("SELECT id,organization_id,role FROM team_invites WHERE email=? AND status='pending' ORDER BY created_at LIMIT 1").bind(email.toLowerCase()).first<{id:string;organization_id:string;role:"admin"|"member"|"viewer"}>();
+  if(pendingInvite){
+    const joined=await database.prepare("SELECT id FROM memberships WHERE user_id=? AND organization_id=?").bind(user.id,pendingInvite.organization_id).first();
+    if(!joined)await database.prepare("INSERT INTO memberships (id,user_id,organization_id,role,created_at) VALUES (?,?,?,?,?)").bind(id("mem"),user.id,pendingInvite.organization_id,pendingInvite.role,now()).run();
+    await database.prepare("UPDATE team_invites SET status='accepted' WHERE id=?").bind(pendingInvite.id).run();
+  }
+  const membership = pendingInvite
+    ? await database.prepare("SELECT organization_id,role FROM memberships WHERE user_id = ? AND organization_id=? LIMIT 1").bind(user.id,pendingInvite.organization_id).first<{organization_id:string;role:"owner"|"admin"|"member"|"viewer"}>()
+    : await database.prepare("SELECT organization_id,role FROM memberships WHERE user_id = ? ORDER BY CASE role WHEN 'owner' THEN 0 WHEN 'admin' THEN 1 ELSE 2 END LIMIT 1").bind(user.id).first<{organization_id:string;role:"owner"|"admin"|"member"|"viewer"}>();
   if (!membership) throw new Error("Workspace membership is unavailable");
   const organization = await database.prepare("SELECT id,name,slug FROM organizations WHERE id = ?").bind(membership.organization_id).first<{id:string;name:string;slug:string}>();
   if (!organization) throw new Error("Workspace is unavailable");
@@ -74,11 +85,13 @@ export async function listRecords(session:WorkspaceSession) {
   return result.results as WorkspaceRecord[];
 }
 export async function createRecord(session:WorkspaceSession,input:{type:string;title:string;subtitle?:string;status?:string;value?:string;progress?:number}) {
+  if(session.role==="viewer") throw new Error("Viewer access cannot create records");
   const recordId=id("rec"), timestamp=now();
   await db().prepare("INSERT INTO workspace_records (id,organization_id,type,title,subtitle,status,value,progress,owner,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)").bind(recordId,session.organization.id,input.type,input.title,input.subtitle||"New workspace record",input.status||"New",input.value||"—",Math.max(0,Math.min(100,input.progress||0)),session.user.name,timestamp,timestamp).run();
   return recordId;
 }
 export async function updateRecord(session:WorkspaceSession,recordId:string,input:{title?:string;status?:string;progress?:number}) {
+  if(session.role==="viewer") throw new Error("Viewer access cannot update records");
   const existing=await db().prepare("SELECT id FROM workspace_records WHERE id = ? AND organization_id = ?").bind(recordId,session.organization.id).first();
   if(!existing) return false;
   await db().prepare("UPDATE workspace_records SET title=COALESCE(?,title),status=COALESCE(?,status),progress=COALESCE(?,progress),updated_at=? WHERE id=? AND organization_id=?").bind(input.title??null,input.status??null,input.progress??null,now(),recordId,session.organization.id).run(); return true;

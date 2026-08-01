@@ -1,0 +1,4 @@
+import { invite, team, updateMemberRole } from "@/db/collaboration";import { getOrCreateSession } from "@/db/workspace";
+async function current(r:Request){const e=r.headers.get("x-demo-email"),n=r.headers.get("x-demo-name");return e&&n?getOrCreateSession(e,n):null;}
+export async function GET(r:Request){const s=await current(r);return s?Response.json(await team(s)):Response.json({error:"Authentication required"},{status:401});}
+export async function POST(r:Request){try{const s=await current(r);if(!s)return Response.json({error:"Authentication required"},{status:401});const b=await r.json() as {email?:string;role?:string;userId?:string};if(b.userId)await updateMemberRole(s,b.userId,b.role||"member");else if(b.email)await invite(s,b.email,b.role||"member");else return Response.json({error:"Email is required"},{status:400});return Response.json(await team(s));}catch(e){return Response.json({error:e instanceof Error?e.message:"Unable to update team"},{status:403});}}

@@ -15,6 +15,27 @@
       "when": 1785520500000,
       "tag": "0002_workspace_core",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785562500000,
+      "tag": "0003_people_network",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1785565200000,
+      "tag": "0004_agent_runtime",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1785567900000,
+      "tag": "0005_collaboration",
+      "breakpoints": true
     }
   ]
 }
