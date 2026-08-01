@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { DashboardData } from "@/db/bootstrap";
 
-const navItems = ["Overview", "Feed", "Idea Validation", "AI Mediation", "Governance Agents", "Financial Dashboard", "Term Sheet Analyzer", "Goals", "CRM", "People", "Team", "Team Access", "Reports", "Settings"] as const;
-const icons: Record<string, string> = { Overview:"⌂",Feed:"◫", "Idea Validation":"✦", "AI Mediation":"⇄", "Governance Agents":"⬡", "Financial Dashboard":"▥", "Term Sheet Analyzer":"§", Goals:"◎", CRM:"◇", People:"◉", Team:"◌", "Team Access":"♙", Reports:"▤", Settings:"⚙" };
+const navItems = ["Overview", "Feed", "Customization", "Idea Validation", "AI Mediation", "Governance Agents", "Financial Dashboard", "Term Sheet Analyzer", "Goals", "CRM", "People", "Team", "Team Access", "Reports", "Settings"] as const;
+const icons: Record<string, string> = { Overview:"⌂",Feed:"◫",Customization:"⌘", "Idea Validation":"✦", "AI Mediation":"⇄", "Governance Agents":"⬡", "Financial Dashboard":"▥", "Term Sheet Analyzer":"§", Goals:"◎", CRM:"◇", People:"◉", Team:"◌", "Team Access":"♙", Reports:"▤", Settings:"⚙" };
 
 export function StartupOS({ user, onSignOut }: { user?: { name: string; email: string }; onSignOut?: () => void }) {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -14,10 +14,12 @@ export function StartupOS({ user, onSignOut }: { user?: { name: string; email: s
   const [query, setQuery] = useState("");
   const [answer, setAnswer] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [pageLoading,setPageLoading]=useState(false);
+  function navigateTo(item:(typeof navItems)[number]){if(item===active)return;setPageLoading(true);setActive(item);setMenuOpen(false);window.setTimeout(()=>setPageLoading(false),280);}
 
   async function load() {
     try {
-      const response = await fetch("/api/dashboard");
+      const response = await fetch("/api/dashboard",{headers:{"x-demo-email":user!.email,"x-demo-name":user!.name}});
       if (!response.ok) throw new Error("Could not connect to the operating data");
       setData(await response.json());
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Something went wrong"); }
@@ -25,7 +27,7 @@ export function StartupOS({ user, onSignOut }: { user?: { name: string; email: s
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("northstar-theme");
     document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
-    fetch("/api/dashboard")
+    fetch("/api/dashboard",{headers:{"x-demo-email":user!.email,"x-demo-name":user!.name}})
       .then((response) => {
         if (!response.ok) throw new Error("Could not connect to the operating data");
         return response.json() as Promise<DashboardData>;
@@ -44,7 +46,7 @@ export function StartupOS({ user, onSignOut }: { user?: { name: string; email: s
   async function approve(id: number) {
     setLoadingId(id); setError("");
     try {
-      const response = await fetch("/api/dashboard", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ insightId: id }) });
+      const response = await fetch("/api/dashboard", { method: "POST", headers: { "Content-Type": "application/json", "x-demo-email":user!.email,"x-demo-name":user!.name }, body: JSON.stringify({ insightId: id }) });
       if (!response.ok) throw new Error("The action could not be approved");
       setData(await response.json());
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Something went wrong"); }
@@ -65,15 +67,17 @@ export function StartupOS({ user, onSignOut }: { user?: { name: string; email: s
     <aside className={menuOpen ? "sidebar open" : "sidebar"}>
       <div className="brand"><span className="brand-mark">N</span><span>northstar</span></div>
       <div className="workspace"><span className="avatar small">A</span><span><b>Arc Labs</b><small>Growth workspace</small></span><span className="chevron">⌄</span></div>
-      <nav aria-label="Main navigation"><p className="nav-label">Workspace</p>{navItems.map((item) => <button key={item} className={active === item ? "nav-item active" : "nav-item"} onClick={() => { setActive(item); setMenuOpen(false); }}><span>{icons[item]}</span>{item}{item === "Overview" && pending.length ? <em>{pending.length}</em> : null}</button>)}</nav>
-      <div className="sidebar-bottom"><button className="profile profile-button" onClick={()=>setActive("Settings")}><span className="avatar">{user?.name?.slice(0,2).toUpperCase() || "VS"}</span><span><b>{user?.name || "Vijetha"}</b><small>{user?.email || "Founder · Admin"}</small></span><span className="status-dot" /></button></div>
+      <nav aria-label="Main navigation"><p className="nav-label">Workspace</p>{navItems.map((item) => <button key={item} className={active === item ? "nav-item active" : "nav-item"} onClick={() => navigateTo(item)}><span>{icons[item]}</span>{item}{item === "Overview" && pending.length ? <em>{pending.length}</em> : null}</button>)}</nav>
+      <div className="sidebar-bottom"><button className="profile profile-button" onClick={()=>navigateTo("Settings")}><span className="avatar">{user?.name?.slice(0,2).toUpperCase() || "VS"}</span><span><b>{user?.name || "Vijetha"}</b><small>{user?.email || "Founder · Admin"}</small></span><span className="status-dot" /></button></div>
     </aside>
     <section className="main-area">
       <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="theme-button" onClick={toggleTheme} aria-label="Switch light or dark mode">◐</button><button className="icon-button" aria-label="Notifications">♢<i>{pending.length}</i></button><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button><button className="signout-button" onClick={onSignOut}>Sign out</button></div></header>
-      <div className="content">{active === "Overview" ? <Overview data={data} pending={pending} approve={approve} loadingId={loadingId} query={query} setQuery={setQuery} answer={answer} ask={askNorthstar} onNavigate={setActive} /> : active === "Feed" ? <FeedPage user={user!}/> : active === "People" ? <PeoplePage user={user!}/> : active === "Team Access" ? <TeamAccessPage user={user!}/> : active === "Settings" ? <SettingsPage user={user!} onSaved={(next)=>{window.localStorage.setItem("northstar-demo-session",JSON.stringify(next));window.dispatchEvent(new Event("northstar-session-change"));}}/> : ["Idea Validation","AI Mediation","Governance Agents","Financial Dashboard","Term Sheet Analyzer"].includes(active) ? <IntelligenceModule active={active} user={user!}/> : <ModulePage active={active} data={data} user={user!} />}{error ? <div className="toast" role="alert">{error}</div> : null}</div>
+      <div className="content">{pageLoading?<ModuleSkeleton label={active}/>:active === "Overview" ? <Overview data={data} pending={pending} approve={approve} loadingId={loadingId} query={query} setQuery={setQuery} answer={answer} ask={askNorthstar} onNavigate={navigateTo} /> : active === "Feed" ? <FeedPage user={user!}/> : active === "Customization" ? <CustomizationPage user={user!}/> : active === "People" ? <PeoplePage user={user!}/> : active === "Team Access" ? <TeamAccessPage user={user!}/> : active === "Settings" ? <SettingsPage user={user!} onSaved={(next)=>{window.localStorage.setItem("northstar-demo-session",JSON.stringify(next));window.dispatchEvent(new Event("northstar-session-change"));}}/> : ["Idea Validation","AI Mediation","Governance Agents","Financial Dashboard","Term Sheet Analyzer"].includes(active) ? <IntelligenceModule active={active} user={user!}/> : <ModulePage active={active} data={data} user={user!} />}{error ? <div className="toast" role="alert">{error}</div> : null}</div>
     </section>
   </main>;
 }
+
+function ModuleSkeleton({label}:{label:string}){return <section className="module-skeleton" aria-live="polite"><div className="skeleton-heading"><span/><div><i/><b/></div></div><div className="skeleton-grid"><article/><article/><article/></div><div className="skeleton-table"><i/><i/><i/><i/></div><p>Loading {label}…</p></section>}
 
 function LoadingState({ error, retry }: { error: string; retry: () => void }) {
   return <main className="loading-screen"><div className="loading-orbit"><span>N</span></div><h1>Aligning your company data</h1><p>{error || "Northstar is preparing today's operating picture…"}</p>{error ? <button className="primary-button" onClick={retry}>Try again</button> : <div className="loading-line"><i /></div>}</main>;
@@ -127,6 +131,23 @@ function ModulePage({ active, data, user }: { active: string; data: DashboardDat
 
 type NetworkPayload={profile:{name:string;email:string;headline:string;location:string;bio:string;skills:string;resume_name:string};people:Array<{id:string;name:string;email:string;headline?:string;location?:string;skills?:string;connection_status:string}>};
 const demoHeaders=(user:{name:string;email:string})=>({"x-demo-email":user.email,"x-demo-name":user.name});
+
+type GuardrailPlan={level:1|2|3|4;classification:string;risk:string;compatibility:number;rationale:string;steps:string[];nodes:Array<{id:string;kind:"event"|"condition"|"action";label:string;detail:string}>;coreFilesModified:number};
+type CustomizationRule={id:string;title:string;requirement:string;target_module:string;level:number;compatibility:number;status:string;version:number;created_at:string;updated_at:string;plan:GuardrailPlan};
+type CustomizationPayload={session:{role:string};rules:CustomizationRule[]};
+function CustomizationPage({user}:{user:{name:string;email:string}}){
+  const example="Whenever shirt stock falls below 10 units, create a purchase request. If order value exceeds ₹50,000, require manager approval.";
+  const [data,setData]=useState<CustomizationPayload|null>(null),[requirement,setRequirement]=useState(example),[module,setModule]=useState("Inventory"),[busy,setBusy]=useState(false),[customError,setCustomError]=useState("");
+  async function request(method="GET",body?:Record<string,unknown>){setBusy(true);setCustomError("");try{const response=await fetch("/api/customizations",{method,headers:{...(body?{"Content-Type":"application/json"}:{}),...demoHeaders(user)},body:body?JSON.stringify(body):undefined});const payload=await response.json() as CustomizationPayload&{error?:string};if(!response.ok)throw new Error(payload.error||"Unable to process customization");setData(payload);return true;}catch(error){setCustomError(error instanceof Error?error.message:"Unable to process customization");return false;}finally{setBusy(false)}}
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(()=>{void request();},[user.email,user.name]);
+  async function analyze(event:React.FormEvent){event.preventDefault();if(requirement.trim())await request("POST",{requirement:requirement.trim(),module});}
+  const selected=data?.rules[0];
+  const ladder=[{level:1,name:"Standard Configuration",mechanism:"Metadata, layouts, field visibility and role permissions",risk:"100% safe"},{level:2,name:"Workflow Automation",mechanism:"Triggers, condition gates, approvals and notifications",risk:"100% safe"},{level:3,name:"Independent Extension",mechanism:"Isolated micro-plugins and versioned external webhooks",risk:"95% safe"},{level:4,name:"Core Modification",mechanism:"Direct changes to core modules",risk:"Blocked"}];
+  const templates=["When a deal exceeds ₹10 lakh, require finance approval and notify the founder.","Hide salary fields from members but allow team leaders to edit them.","Send qualified CRM leads to an external enrichment webhook."];
+  return <><section className="custom-hero"><div><span>ADAPTOS GUARDRAIL ENGINE</span><h1>Customize the business. Protect the core.</h1><p>Describe a rule in plain English. Northstar classifies its upgrade risk, generates a safe implementation plan, and creates a reversible workflow without code spaghetti.</p></div><div className="safety-seal"><strong>100%</strong><span>upgrade safety target</span><small>0 core files changed</small></div></section><section className="risk-ladder">{ladder.map(item=><article className={selected?.plan.level===item.level?`selected level-${item.level}`:`level-${item.level}`} key={item.level}><span>LEVEL {item.level}</span><b>{item.name}</b><p>{item.mechanism}</p><em>{item.risk}</em></article>)}</section><section className="custom-workbench"><form onSubmit={analyze}><div className="workbench-heading"><span className="eyebrow violet">NATURAL-LANGUAGE REQUIREMENT</span><h2>What should your business do?</h2><p>Include the event, conditions, action, approval owner, and any numeric thresholds.</p></div><label>Target module<select value={module} onChange={event=>setModule(event.target.value)}>{["Inventory","POS","CRM","Finance","People","Operations"].map(item=><option key={item}>{item}</option>)}</select></label><textarea value={requirement} onChange={event=>setRequirement(event.target.value)} maxLength={4000}/><div className="prompt-shortcuts">{templates.map(template=><button type="button" key={template} onClick={()=>setRequirement(template)}>{template}</button>)}</div><button className="primary-button" disabled={busy||!requirement.trim()}>{busy?"Analyzing guardrails…":"Analyze & generate workflow"}</button></form><aside><span className="eyebrow blue">GUARDRAIL PROMISE</span>{["Classify before changing anything","Keep extensions outside the core","Record every version and approval","Block unsafe core modifications","Preserve one-click upgrades"].map(item=><div key={item}><i>✓</i>{item}</div>)}</aside></section>{customError?<div className="module-error">{customError}</div>:null}{busy&&!data?<ModuleSkeleton label="guardrail analysis"/>:selected?<GuardrailResult rule={selected} busy={busy} action={(action)=>request("PATCH",{id:selected.id,action})}/>:null}{data?.rules.length?<section className="panel version-history"><div className="panel-header"><div><span className="eyebrow coral">IMMUTABLE AUDIT LEDGER</span><h2>Rules & version history</h2></div><span>{data.rules.length} evaluations</span></div>{data.rules.map(rule=><div key={rule.id}><span className={`history-level level-${rule.level}`}>L{rule.level}</span><div><b>{rule.title}</b><small>{rule.target_module} · Version {rule.version} · {new Date(rule.updated_at||rule.created_at).toLocaleString()}</small></div><em className={rule.status}>{rule.status.replace("_"," ")}</em></div>)}</section>:null}</>;
+}
+function GuardrailResult({rule,busy,action}:{rule:CustomizationRule;busy:boolean;action:(action:"approve"|"rollback")=>void}){const plan=rule.plan;return <section className="guardrail-result"><header><div className={`classification-badge level-${plan.level}`}><small>LEVEL {plan.level}</small><b>{plan.classification}</b></div><div><span className="eyebrow mint">GUARDRAIL ANALYSIS COMPLETE</span><h2>{plan.compatibility}% compatibility score</h2><p>{plan.rationale}</p></div><div className="core-proof"><b>{plan.coreFilesModified}</b><span>core files modified</span></div></header><div className="plan-grid"><article><h3>Implementation plan</h3><ol>{plan.steps.map(step=><li key={step}>{step}</li>)}</ol></article><article><h3>Upgrade risk</h3><strong>{plan.risk}</strong><p>All generated assets are versioned, auditable, and reversible.</p></article></div>{plan.nodes.length?<div className="workflow-builder"><div><span className="eyebrow blue">VISUAL WORKFLOW BUILDER</span><h3>Generated event pipeline</h3></div><div className="workflow-nodes">{plan.nodes.map((node,index)=><div className={`workflow-node ${node.kind}`} key={node.id}><small>{node.kind}</small><b>{node.label}</b><p>{node.detail}</p>{index<plan.nodes.length-1?<i>→</i>:null}</div>)}</div></div>:<div className="blocked-plan"><b>Core modification blocked</b><p>Reframe this outcome as a safe workflow or independent extension before implementation.</p></div>}<footer><span>Version {rule.version} · Status: <b>{rule.status}</b></span><div>{rule.status==="active"?<button className="rollback-button" onClick={()=>action("rollback")} disabled={busy}>Rollback version</button>:rule.status!=="blocked"?<button className="primary-button" onClick={()=>action("approve")} disabled={busy}>{busy?"Applying…":"Approve & activate"}</button>:null}</div></footer></section>}
 
 type FeedPost={id:string;content:string;created_at:string;name:string;email:string;likes:number;liked:number;comments:Array<{id:string;content:string;created_at:string;name:string}>};
 function FeedPage({user}:{user:{name:string;email:string}}){
