@@ -3,7 +3,7 @@ import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("builds the Northstar application and API", async () => {
-  await access(new URL("../dist/server/index.js", import.meta.url));
+  await access(new URL("../.next/BUILD_ID", import.meta.url));
   const [page, entry, auth, landing, app, api, agents, people, resume, hosting] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/client-entry.tsx", import.meta.url), "utf8"),
@@ -36,7 +36,7 @@ test("builds the Northstar application and API", async () => {
   assert.match(agents, /api\.openai\.com\/v1\/responses/);
   assert.match(agents, /json_schema/);
   assert.match(people, /saveProfile/);
-  assert.match(resume, /FILES\.put/);
+  assert.match(resume, /put\(key,\s*file/);
   assert.equal(JSON.parse(hosting).d1, "DB");
   assert.equal(JSON.parse(hosting).r2, "FILES");
 });

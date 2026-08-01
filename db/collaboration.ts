@@ -1,6 +1,6 @@
-import { env } from "cloudflare:workers";
+import { database as runtimeDatabase } from "./runtime";
 import type { WorkspaceSession } from "./workspace";
-const db=()=>env.DB,now=()=>new Date().toISOString(),id=(p:string)=>`${p}_${crypto.randomUUID()}`;
+const db=()=>runtimeDatabase,now=()=>new Date().toISOString(),id=(p:string)=>`${p}_${crypto.randomUUID()}`;
 export async function ensureCollaboration(){await db().batch([
   db().prepare("CREATE TABLE IF NOT EXISTS posts (id TEXT PRIMARY KEY, author_id TEXT NOT NULL, organization_id TEXT NOT NULL, content TEXT NOT NULL, created_at TEXT NOT NULL)"),
   db().prepare("CREATE TABLE IF NOT EXISTS post_likes (post_id TEXT NOT NULL, user_id TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(post_id,user_id))"),

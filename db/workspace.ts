@@ -1,9 +1,9 @@
-import { env } from "cloudflare:workers";
+import { database as runtimeDatabase } from "./runtime";
 
 export type WorkspaceRecord = { id: string; type: string; title: string; subtitle: string; status: string; value: string; progress: number; owner: string; created_at: string; updated_at: string };
 export type WorkspaceSession = { user: { id: string; email: string; name: string }; organization: { id: string; name: string; slug: string }; role: "owner" | "admin" | "member" | "viewer" };
 
-function db() { if (!env.DB) throw new Error("Database binding is unavailable"); return env.DB; }
+function db() { return runtimeDatabase; }
 const now = () => new Date().toISOString();
 const id = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
 
