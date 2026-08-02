@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+import { database as runtimeDatabase } from "./runtime";
 
 export type DashboardData = {
   metrics: Array<{ id: number; label: string; value: string; change: string; tone: string; progress: number }>;
@@ -7,7 +7,7 @@ export type DashboardData = {
   activity: Array<{ id: number; actor: string; action: string; timestamp: string }>;
 };
 
-function database() { if (!env.DB) throw new Error("Database binding is unavailable"); return env.DB; }
+function database() { return runtimeDatabase; }
 
 export async function ensureDatabase() {
   const db = database();

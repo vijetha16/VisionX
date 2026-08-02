@@ -1,9 +1,9 @@
-import { env } from "cloudflare:workers";
+import { database as runtimeDatabase } from "./runtime";
 import type { WorkspaceSession } from "./workspace";
 
 export type WorkflowNode={id:string;kind:"event"|"condition"|"action";label:string;detail:string};
 export type GuardrailPlan={level:1|2|3|4;classification:string;risk:string;compatibility:number;rationale:string;steps:string[];nodes:WorkflowNode[];coreFilesModified:number};
-const database=()=>env.DB,now=()=>new Date().toISOString(),id=(prefix:string)=>`${prefix}_${crypto.randomUUID()}`;
+const database=()=>runtimeDatabase,now=()=>new Date().toISOString(),id=(prefix:string)=>`${prefix}_${crypto.randomUUID()}`;
 
 export async function ensureCustomizationDatabase(){await database().batch([
   database().prepare("CREATE TABLE IF NOT EXISTS customization_rules (id TEXT PRIMARY KEY, organization_id TEXT NOT NULL, author_id TEXT NOT NULL, title TEXT NOT NULL, requirement TEXT NOT NULL, target_module TEXT NOT NULL, level INTEGER NOT NULL, compatibility INTEGER NOT NULL, status TEXT NOT NULL, plan_json TEXT NOT NULL, version INTEGER NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
