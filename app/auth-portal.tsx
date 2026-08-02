@@ -11,8 +11,8 @@ function nameFromEmail(email: string) {
 export function AuthPortal({ onAuthenticated,onBack }: { onAuthenticated: (user: DemoUser) => void;onBack:()=>void }) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("founder@arclabs.co");
-  const [password, setPassword] = useState("demo1234");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("northstar-theme");
