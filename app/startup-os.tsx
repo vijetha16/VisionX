@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { DashboardData } from "@/db/bootstrap";
 
 const navItems = ["Overview", "Feed", "Customization", "Idea Validation", "AI Mediation", "Governance Agents", "Financial Dashboard", "Term Sheet Analyzer", "Goals", "CRM", "People", "Team", "Team Access", "Reports", "Settings"] as const;
@@ -14,6 +14,9 @@ export function StartupOS({ user, onSignOut }: { user?: { name: string; email: s
   const [query, setQuery] = useState("");
   const [answer, setAnswer] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notificationsOpen,setNotificationsOpen]=useState(false);
+  const [readNotifications,setReadNotifications]=useState<number[]>([]);
+  const notificationsRef=useRef<HTMLDivElement>(null);
   const [pageLoading,setPageLoading]=useState(false);
   function navigateTo(item:(typeof navItems)[number]){if(item===active)return;setPageLoading(true);setActive(item);setMenuOpen(false);window.setTimeout(()=>setPageLoading(false),280);}
 
@@ -42,6 +45,8 @@ export function StartupOS({ user, onSignOut }: { user?: { name: string; email: s
     window.localStorage.setItem("northstar-theme", nextTheme);
   }
   const pending = useMemo(() => data?.insights.filter((item) => item.status === "pending") ?? [], [data]);
+  const unreadNotifications=pending.filter(item=>!readNotifications.includes(item.id));
+  useEffect(()=>{if(!notificationsOpen)return;const close=(event:PointerEvent)=>{if(!notificationsRef.current?.contains(event.target as Node))setNotificationsOpen(false)};const escape=(event:KeyboardEvent)=>{if(event.key==="Escape")setNotificationsOpen(false)};document.addEventListener("pointerdown",close);document.addEventListener("keydown",escape);return()=>{document.removeEventListener("pointerdown",close);document.removeEventListener("keydown",escape)};},[notificationsOpen]);
 
   async function approve(id: number) {
     setLoadingId(id); setError("");
@@ -71,7 +76,7 @@ export function StartupOS({ user, onSignOut }: { user?: { name: string; email: s
       <div className="sidebar-bottom"><button className="profile profile-button" onClick={()=>navigateTo("Settings")}><span className="avatar">{user?.name?.slice(0,2).toUpperCase() || "AC"}</span><span><b>{user?.name || "Account"}</b><small>{user?.email || "Founder · Admin"}</small></span><span className="status-dot" /></button></div>
     </aside>
     <section className="main-area">
-      <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="theme-button" onClick={toggleTheme} aria-label="Switch light or dark mode">◐</button><button className="icon-button" aria-label="Notifications">♢<i>{pending.length}</i></button><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button><button className="signout-button" onClick={onSignOut}>Sign out</button></div></header>
+      <header className="topbar"><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">☰</button><div className="breadcrumb"><span>Arc Labs</span><b>/</b><strong>{active}</strong></div><div className="top-actions"><button className="theme-button" onClick={toggleTheme} aria-label="Switch light or dark mode">◐</button><div className="notification-center" ref={notificationsRef}><button className="icon-button" aria-label="Notifications" aria-expanded={notificationsOpen} onClick={()=>setNotificationsOpen(!notificationsOpen)}>♢{unreadNotifications.length?<i>{unreadNotifications.length}</i>:null}</button>{notificationsOpen?<section className="notification-popover" aria-label="Notifications"><header><div><span>Notifications</span><small>{unreadNotifications.length} unread</small></div>{unreadNotifications.length?<button onClick={()=>setReadNotifications(pending.map(item=>item.id))}>Mark all read</button>:null}</header><div className="notification-list">{pending.length?pending.map(item=><button key={item.id} className={readNotifications.includes(item.id)?"read":""} onClick={()=>{setReadNotifications([...new Set([...readNotifications,item.id])]);navigateTo("Overview");setNotificationsOpen(false)}}><span className={`notification-symbol ${item.severity}`}>{item.severity==="critical"?"!":"△"}</span><span><b>{item.title}</b><small>{item.detail}</small><em>{item.action} →</em></span></button>):<div className="notification-empty"><span>✓</span><b>You’re all caught up</b><small>No decisions need attention right now.</small></div>}</div>{data.activity.length?<footer><span>RECENT ACTIVITY</span><p><b>{data.activity[0].actor}</b> {data.activity[0].action}<small>{data.activity[0].timestamp}</small></p></footer>:null}</section>:null}</div><button className="primary-button" onClick={() => document.getElementById("ask-input")?.focus()}>✦ Ask Northstar</button><button className="signout-button" onClick={onSignOut}>Sign out</button></div></header>
       <div className="content">{pageLoading?<ModuleSkeleton label={active}/>:active === "Overview" ? <Overview data={data} user={user!} pending={pending} approve={approve} loadingId={loadingId} query={query} setQuery={setQuery} answer={answer} ask={askNorthstar} onNavigate={navigateTo} /> : active === "Feed" ? <FeedPage user={user!}/> : active === "Customization" ? <CustomizationPage user={user!}/> : active === "People" ? <PeoplePage user={user!}/> : active === "Team Access" ? <TeamAccessPage user={user!}/> : active === "Settings" ? <SettingsPage user={user!} onSaved={(next)=>{window.localStorage.setItem("northstar-demo-session",JSON.stringify(next));window.dispatchEvent(new Event("northstar-session-change"));}}/> : ["Idea Validation","AI Mediation","Governance Agents","Financial Dashboard","Term Sheet Analyzer"].includes(active) ? <IntelligenceModule active={active} user={user!}/> : <ModulePage active={active} data={data} user={user!} />}{error ? <div className="toast" role="alert">{error}</div> : null}</div>
     </section>
   </main>;
