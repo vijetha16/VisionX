@@ -20,8 +20,18 @@ export function ClientEntry() {
   const [enteredWorkspace,setEnteredWorkspace]=useState(false);
   const session = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const user = session ? JSON.parse(session) as DemoUser : null;
-  function saveUser(nextUser: DemoUser) {
-    window.localStorage.setItem(SESSION_KEY, JSON.stringify(nextUser));
+  async function saveUser(nextUser: DemoUser) {
+    let resolvedUser = nextUser;
+    try {
+      const response = await fetch("/api/workspace", { headers: { "x-demo-email": nextUser.email, "x-demo-name": nextUser.name } });
+      if (response.ok) {
+        const payload = await response.json() as { session?: { user?: DemoUser } };
+        if (payload.session?.user) resolvedUser = payload.session.user;
+      }
+    } catch {
+      // The local identity remains usable if the profile service is temporarily unavailable.
+    }
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify(resolvedUser));
     window.dispatchEvent(new Event(SESSION_EVENT));
     setEnteredWorkspace(true);
   }
