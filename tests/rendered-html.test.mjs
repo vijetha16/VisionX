@@ -33,8 +33,8 @@ test("builds the Northstar application and API", async () => {
   assert.match(app, /Autonomous Governance Agents/i);
   assert.match(app, /Real-Time Financial Dashboard/i);
   assert.match(app, /AI Term Sheet Analyzer/i);
-  assert.match(agents, /api\.openai\.com\/v1\/responses/);
-  assert.match(agents, /json_schema/);
+  assert.match(agents, /generativelanguage\.googleapis\.com/);
+  assert.match(agents, /responseJsonSchema/);
   assert.match(people, /saveProfile/);
   assert.match(resume, /put\(key,\s*file/);
   assert.equal(JSON.parse(hosting).d1, "DB");
